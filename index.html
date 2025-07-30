@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Vật Lí 12 - Thầy Physics</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" xintegrity="sha384-n8MVd4RsNIU0KOVEMckDpb+GUeNeNAiA5GNpTvnmgutPElblRdcQ2qT/RCakADem" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" xintegrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Tùy chỉnh font chữ và màu nền */
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f0f2f5;
+        }
+        
+        /* Tùy chỉnh thanh cuộn */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* Tăng kích thước font cho công thức KaTeX */
+        .katex {
+            font-size: 1.1em !important;
+        }
+        
+        /* Hiệu ứng cho mục lục */
+        details summary .arrow {
+            transition: transform 0.2s ease-in-out;
+        }
+        details[open] > summary .arrow {
+            transform: rotate(90deg);
+        }
+        
+        /* Loại bỏ mũi tên mặc định của details */
+        summary {
+            list-style: none;
+        }
+        summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="relative w-full h-screen max-w-6xl mx-auto bg-white flex flex-col md:flex-row shadow-2xl">
+        
+        <!-- Overlay for mobile sidebar -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
+        
+        <!-- Cột Trái: Mục lục & Điều hướng (Sidebar) -->
+        <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-30 w-4/5 sm:w-2/3 md:w-1/3 lg:w-1/4 bg-slate-50 border-r border-slate-200 p-4 custom-scrollbar overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="flex justify-between items-center mb-4">
+                 <h2 class="text-xl font-bold text-slate-800 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-cyan-600"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+                    Mục lục
+                </h2>
+                <button id="close-sidebar-btn" class="md:hidden p-1 text-slate-500 hover:text-slate-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <nav id="table-of-contents">
+                <!-- Nội dung mục lục sẽ được JS chèn vào đây -->
+            </nav>
+        </aside>
+
+        <!-- Cột Phải: Chatbot -->
+        <div class="w-full flex flex-col h-screen bg-white">
+            <!-- Header của Chatbot -->
+            <header class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-2 md:p-4 flex items-center shadow-md z-10 flex-shrink-0">
+                <!-- Hamburger Menu Button -->
+                <button id="menu-btn" class="mr-2 p-1 text-white md:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+                <div class="w-7 h-7 md:w-10 md:h-10 bg-white/25 rounded-full flex items-center justify-center mr-2 flex-shrink-0 border border-white/50">
+                    <svg class="w-4 h-4 md:w-7 md:h-7 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="currentColor" stroke-width="1.5"/>
+                        <ellipse cx="12" cy="12" rx="5" ry="10" stroke="currentColor" stroke-width="1.5" transform="rotate(45 12 12)"/>
+                        <ellipse cx="12" cy="12" rx="5" ry="10" stroke="currentColor" stroke-width="1.5" transform="rotate(-45 12 12)"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-sm md:text-xl font-bold">Thầy Physics</h1>
+                    <p class="hidden sm:block text-xs md:text-sm opacity-90">Người bạn đồng hành Vật lí 12</p>
+                </div>
+            </header>
+
+            <!-- Khung Chat -->
+            <main id="chat-container" class="flex-1 p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+                <!-- Tin nhắn sẽ được chèn vào đây -->
+            </main>
+
+            <!-- Chân trang: Khung nhập liệu -->
+            <footer class="bg-white p-3 sm:p-4 border-t border-slate-200 flex-shrink-0">
+                <div class="flex items-center bg-slate-100 rounded-xl border-2 border-transparent focus-within:border-cyan-500 transition-all duration-300">
+                    <label for="file-input" class="p-3 text-slate-500 hover:text-cyan-600 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.59a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    </label>
+                    <input type="file" id="file-input" class="hidden" accept="image/*,.pdf,.doc,.docx">
+                    
+                    <input type="text" id="user-input" placeholder="Hỏi thầy, tải lên hoặc dán ảnh bài tập..." class="flex-1 p-3 bg-transparent focus:outline-none transition w-full text-slate-800">
+                    
+                    <button id="mic-btn" class="p-3 text-slate-500 hover:text-cyan-600 cursor-pointer transition-colors">
+                        <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>
+                    </button>
+
+                    <button id="send-btn" class="bg-cyan-500 text-white p-3 rounded-r-lg hover:bg-cyan-600 transition-all duration-300 font-semibold shadow-sm hover:shadow-md disabled:bg-slate-400 disabled:cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // IIFE (Immediately Invoked Function Expression)
+        (() => {
+            document.addEventListener('DOMContentLoaded', () => {
+                
+                // --- DOM ELEMENTS ---
+                const DOM = {
+                    chatContainer: document.getElementById('chat-container'),
+                    userInput: document.getElementById('user-input'),
+                    sendBtn: document.getElementById('send-btn'),
+                    tocContainer: document.getElementById('table-of-contents'),
+                    fileInput: document.getElementById('file-input'),
+                    micBtn: document.getElementById('mic-btn'),
+                    micIcon: document.getElementById('mic-icon'),
+                    menuBtn: document.getElementById('menu-btn'),
+                    sidebar: document.getElementById('sidebar'),
+                    sidebarOverlay: document.getElementById('sidebar-overlay'),
+                    closeSidebarBtn: document.getElementById('close-sidebar-btn')
+                };
+
+                // --- KNOWLEDGE BASE (UPDATED) ---
+                const physicsData = {
+                    "Chương 1: VẬT LÍ NHIỆT": {
+                        "Bài 1: Sự chuyển thể": {
+                            summary: "Bài học này nghiên cứu về các thể (rắn, lỏng, khí) của vật chất và các quá trình chuyển đổi qua lại giữa chúng, dựa trên mô hình động học phân tử.",
+                            formulas: [
+                                { eq: "$Q = \\lambda m$", desc: "<b>Nhiệt nóng chảy:</b><br><i> • Q: nhiệt lượng cần cung cấp để làm nóng chảy hoàn toàn vật rắn (J).<br> • m: khối lượng của vật (kg).<br> • λ: nhiệt nóng chảy riêng của chất (J/kg).</i>" }, 
+                                { eq: "$Q = Lm$", desc: "<b>Nhiệt hoá hơi:</b><br><i> • Q: nhiệt lượng cần cung cấp để làm hoá hơi hoàn toàn khối chất lỏng (J).<br> • m: khối lượng của chất lỏng (kg).<br> • L: nhiệt hoá hơi riêng của chất (J/kg).</i>" }
+                            ],
+                            details: "Chất rắn kết tinh (kim loại, nước đá) có nhiệt độ nóng chảy xác định. Chất rắn vô định hình (thủy tinh, sáp) không có nhiệt độ nóng chảy xác định.",
+                            sections: ["Mô hình động học phân tử và cấu trúc vật chất", "Sự chuyển thể của các chất", "Sự nóng chảy", "Sự hoá hơi"],
+                            sectionDetails: {
+                                "Mô hình động học phân tử và cấu trúc vật chất": "Vật chất được cấu tạo từ các hạt rất nhỏ gọi là phân tử. Các phân tử luôn chuyển động không ngừng (chuyển động nhiệt) và giữa chúng có lực tương tác. Cấu trúc của 3 thể rắn, lỏng, khí khác nhau về khoảng cách, trật tự sắp xếp và đặc điểm chuyển động của các phân tử.",
+                                "Sự chuyển thể của các chất": "Là quá trình vật chất chuyển từ thể này sang thể khác. Các quá trình chuyển thể chính bao gồm: nóng chảy (rắn → lỏng), đông đặc (lỏng → rắn), hoá hơi (lỏng → khí), ngưng tụ (khí → lỏng), thăng hoa (rắn → khí) và ngưng kết (khí → rắn).",
+                                "Sự nóng chảy": "Là quá trình chuyển từ thể rắn sang thể lỏng. Chất rắn kết tinh nóng chảy ở nhiệt độ xác định, còn chất rắn vô định hình không có nhiệt độ nóng chảy xác định.",
+                                "Sự hoá hơi": "Là quá trình chuyển từ thể lỏng sang thể khí, bao gồm sự bay hơi (xảy ra trên bề mặt ở mọi nhiệt độ) và sự sôi (xảy ra cả bên trong và trên bề mặt ở nhiệt độ sôi xác định)."
+                            }
+                        },
+                        "Bài 2: Thang nhiệt độ": {
+                            summary: "Bài học giới thiệu về chiều truyền nhiệt, các thang đo nhiệt độ thông dụng (Celsius, Kelvin) và cách chuyển đổi giữa chúng.",
+                            formulas: [
+                                { eq: "$T(K) = t(^{\\circ}C) + 273,15$", desc: "<b>Chuyển đổi sang Kelvin:</b><br><i> • T(K): giá trị nhiệt độ theo thang Kelvin.<br> • t(°C): giá trị nhiệt độ theo thang Celsius.</i>" }
+                            ],
+                            details: "Nhiệt độ 0 K (độ 0 tuyệt đối) là nhiệt độ thấp nhất về mặt lý thuyết, tại đó động năng chuyển động nhiệt của các phân tử bằng không.",
+                            sections: ["Chiều truyền năng lượng nhiệt", "Thang nhiệt độ"],
+                            sectionDetails: {
+                                "Chiều truyền năng lượng nhiệt": "Khi hai vật có nhiệt độ khác nhau tiếp xúc, năng lượng nhiệt luôn truyền từ vật có nhiệt độ cao hơn sang vật có nhiệt độ thấp hơn cho đến khi đạt cân bằng nhiệt.",
+                                "Thang nhiệt độ": "Dùng để xác định độ 'nóng', 'lạnh' của vật. Các thang đo phổ biến là Celsius (°C) và Kelvin (K). Thang Kelvin là thang nhiệt độ tuyệt đối."
+                            }
+                        },
+                        "Bài 3: Nội năng. Định luật 1 của nhiệt động lực học": {
+                            summary: "Nội năng là tổng động năng và thế năng của các phân tử. Định luật 1 Nhiệt động lực học thực chất là định luật bảo toàn năng lượng áp dụng cho các quá trình nhiệt.",
+                            formulas: [
+                                { eq: "$\\Delta U = A + Q$", desc: "<b>Định luật 1 NĐLH:</b><br><i> • ΔU: độ biến thiên nội năng của hệ (J).<br> • A: công mà hệ nhận được (J).<br> • Q: nhiệt lượng mà hệ nhận được (J).</i>" }, 
+                                { eq: "$Q = mc(T_2 - T_1)$", desc: "<b>Nhiệt lượng tỏa/thu:</b><br><i> • Q: nhiệt lượng (J).<br> • m: khối lượng (kg).<br> • c: nhiệt dung riêng của chất (J/kg.K).<br> • T: nhiệt độ (K).</i>" }
+                            ],
+                            details: "Quy ước dấu rất quan trọng: Hệ nhận nhiệt Q > 0, nhận công A > 0. Ngược lại, hệ truyền nhiệt Q < 0, thực hiện công A < 0.",
+                            sections: ["Nội năng", "Các cách làm thay đổi nội năng", "Định luật 1 của nhiệt động lực học"],
+                            sectionDetails: {
+                                "Nội năng": "Là một dạng năng lượng bên trong của vật, bao gồm tổng động năng chuyển động của các phân tử và thế năng tương tác giữa chúng. Nội năng phụ thuộc vào nhiệt độ và thể tích.",
+                                "Các cách làm thay đổi nội năng": "Có hai cách: thực hiện công và truyền nhiệt.",
+                                "Định luật 1 của nhiệt động lực học": "Phát biểu rằng độ biến thiên nội năng của một hệ bằng tổng công và nhiệt lượng mà hệ nhận được."
+                            }
+                        },
+                         "Bài 4: Thực hành đo nhiệt dung riêng, nhiệt nóng chảy riêng, nhiệt hoá hơi riêng": {
+                            summary: "Bài thực hành này giúp làm quen với các phương pháp thực nghiệm để xác định các hằng số nhiệt quan trọng của vật chất, dựa trên nguyên tắc cân bằng nhiệt và bảo toàn năng lượng.",
+                            formulas: [
+                                { eq: "$c_{n}=\\frac{UIt}{m_{n}(T-T_{0})}$", desc: "<b>Đo nhiệt dung riêng của nước</b>" },
+                                { eq: "$\\lambda=\\frac{m_{n}c_{n}(T_{0}-T)-m_{d}c_{n}(T-273)}{m_{d}}$", desc: "<b>Đo nhiệt nóng chảy riêng của nước đá</b>" },
+                                { eq: "$L=\\frac{\\mathcal{P}t}{\\Delta m}$", desc: "<b>Đo nhiệt hoá hơi riêng của nước</b>" }
+                            ],
+                            details: "Cần chú ý các nguồn gây sai số như sự tỏa nhiệt ra môi trường để có biện pháp khắc phục.",
+                            sections: ["Đo nhiệt dung riêng của nước", "Đo nhiệt nóng chảy riêng của nước đá", "Đo nhiệt hoá hơi riêng của nước"],
+                            sectionDetails: {
+                               "Đo nhiệt dung riêng của nước": "Dùng phương pháp truyền nhiệt bằng dòng điện, đo U, I, t và độ tăng nhiệt độ để suy ra c.",
+                               "Đo nhiệt nóng chảy riêng của nước đá": "Dùng phương pháp pha trộn, dựa vào phương trình cân bằng nhiệt khi nước đá tan hết.",
+                               "Đo nhiệt hoá hơi riêng của nước": "Dùng ấm đun có công suất đã biết, đo khối lượng nước hoá hơi trong một khoảng thời gian."
+                            }
+                        }
+                    },
+                    "Chương 2: KHÍ LÍ TƯỞNG": {
+                        "Bài 5: Thuyết động học phân tử chất khí": {
+                            summary: "Bài học xây dựng mô hình vi mô cho chất khí, từ đó giải thích các tính chất vĩ mô của nó như khả năng lan tỏa, gây áp suất.",
+                            formulas: [],
+                            details: "Chuyển động Brown là bằng chứng trực quan cho thấy các phân tử chuyển động hỗn loạn, không ngừng.",
+                            sections: ["Chuyển động Brown", "Thuyết động học phân tử chất khí"],
+                            sectionDetails: {
+                                "Chuyển động Brown": "Là chuyển động hỗn loạn, không ngừng của các hạt rất nhỏ trong chất lỏng hoặc chất khí, do sự va chạm không cân bằng của các phân tử môi trường.",
+                                "Thuyết động học phân tử chất khí": "Gồm các nội dung chính: Chất khí gồm các phân tử kích thước nhỏ; luôn chuyển động hỗn loạn; va chạm vào thành bình gây ra áp suất."
+                            }
+                        },
+                        "Bài 6: Định luật Boyle. Định luật Charles": {
+                            summary: "Bài học nghiên cứu mối quan hệ giữa các thông số trạng thái (p, V, T) của một lượng khí không đổi trong hai quá trình cơ bản: đẳng nhiệt và đẳng áp.",
+                            formulas: [
+                                { eq: "$p_{1}V_{1} = p_{2}V_{2}$", desc: "<b>Định luật Boyle (đẳng nhiệt):</b><br><i>Trong quá trình đẳng nhiệt, áp suất tỉ lệ nghịch với thể tích.</i>" }, 
+                                { eq: "$\\frac{V_1}{T_1} = \\frac{V_2}{T_2}$", desc: "<b>Định luật Charles (đẳng áp):</b><br><i>Trong quá trình đẳng áp, thể tích tỉ lệ thuận với nhiệt độ tuyệt đối.</i>" }
+                            ],
+                            details: "Lưu ý quan trọng: Nhiệt độ T trong các công thức của chất khí bắt buộc phải sử dụng đơn vị là Kelvin (K).",
+                            sections: ["Trạng thái và quá trình biến đổi", "Định luật Boyle", "Định luật Charles"],
+                            sectionDetails: {
+                                "Trạng thái và quá trình biến đổi": "Trạng thái của một lượng khí được xác định bởi 3 thông số: áp suất (p), thể tích (V) và nhiệt độ tuyệt đối (T).",
+                                "Định luật Boyle": "Phát biểu cho quá trình đẳng nhiệt (nhiệt độ không đổi): Áp suất của một lượng khí xác định tỉ lệ nghịch với thể tích của nó.",
+                                "Định luật Charles": "Phát biểu cho quá trình đẳng áp (áp suất không đổi): Thể tích của một lượng khí xác định tỉ lệ thuận với nhiệt độ tuyệt đối của nó."
+                            }
+                        },
+                        "Bài 7: Phương trình trạng thái của khí lí tưởng": {
+                            summary: "Phương trình này tổng quát hóa mối quan hệ giữa cả ba thông số trạng thái (p, V, T) cho một lượng khí lí tưởng không đổi.",
+                            formulas: [
+                                { eq: "$\\frac{p_1V_1}{T_1} = \\frac{p_2V_2}{T_2}$", desc: "<b>Phương trình trạng thái:</b><br><i>Biểu thức $\\frac{pV}{T}$ là một hằng số đối với một lượng khí xác định.</i>" }, 
+                                { eq: "$pV = nRT$", desc: "<b>Phương trình Clapeyron-Mendeleev:</b><br><i> • n: số mol của khối khí (mol).<br> • R: hằng số khí lí tưởng (R ≈ 8,31 J/mol.K).</i>" }
+                            ],
+                            details: "Từ phương trình trạng thái, ta có thể suy ra các định luật Boyle, Charles và định luật cho quá trình đẳng tích: $\\frac{p_1}{T_1} = \\frac{p_2}{T_2}$.",
+                            sections: ["Khí lí tưởng", "Phương trình trạng thái của khí lí tưởng", "Quá trình đẳng tích"],
+                            sectionDetails: {
+                                "Khí lí tưởng": "Là một mô hình chất khí mà trong đó các phân tử được coi là chất điểm và chỉ tương tác với nhau khi va chạm.",
+                                "Phương trình trạng thái của khí lí tưởng": "Là phương trình liên hệ giữa 3 thông số trạng thái p, V, T của một lượng khí: $pV/T = const$.",
+                                "Quá trình đẳng tích": "Là quá trình biến đổi trạng thái khi thể tích không đổi. Khi đó, áp suất tỉ lệ thuận với nhiệt độ tuyệt đối: $p/T = const$."
+                            }
+                        },
+                        "Bài 8: Áp suất – động năng của phân tử khí": {
+                            summary: "Bài học này thiết lập mối liên hệ định lượng giữa áp suất (đại lượng vĩ mô) và động năng chuyển động của các phân tử khí (đại lượng vi mô).",
+                            formulas: [
+                                { eq: "$p=\\frac{1}{3}\\mu m\\overline{v^{2}}$", desc: "<b>Biểu thức áp suất:</b><br><i> • p: áp suất (Pa).<br> • μ: mật độ phân tử (số hạt/m³).<br> • m: khối lượng của một phân tử (kg).<br> • $\\overline{v^2}$: trung bình của bình phương vận tốc các phân tử (m²/s²).</i>" }, 
+                                { eq: "$W_{d}=\\frac{3}{2}kT$", desc: "<b>Động năng tịnh tiến trung bình:</b><br><i> • Wₐ: động năng tịnh tiến trung bình của một phân tử (J).<br> • k: hằng số Boltzmann (k ≈ 1,38.10⁻²³ J/K).<br> • T: nhiệt độ tuyệt đối (K).</i>" }
+                            ],
+                            details: "Nhiệt độ của một khối khí là thước đo trực tiếp cho năng lượng chuyển động trung bình của các phân tử cấu tạo nên nó.",
+                            sections: ["Áp suất của chất khí", "Động năng phân tử", "Nội năng của khí lí tưởng"],
+                            sectionDetails: {
+                                "Áp suất của chất khí": "Áp suất khí tác dụng lên thành bình là do các phân tử khí va chạm vào thành bình. Áp suất càng lớn khi mật độ, khối lượng và vận tốc của chúng càng lớn.",
+                                "Động năng phân tử": "Động năng tịnh tiến trung bình của các phân tử khí tỉ lệ thuận với nhiệt độ tuyệt đối của khối khí.",
+                                "Nội năng của khí lí tưởng": "Đối với khí lí tưởng, nội năng chỉ phụ thuộc vào nhiệt độ."
+                            }
+                        }
+                    },
+                    "Chương 3: TỪ TRƯỜNG": {
+                        "Bài 9: Khái niệm từ trường": {
+                            summary: "Từ trường là một dạng vật chất tồn tại xung quanh nam châm hoặc dòng điện, có khả năng tác dụng lực từ lên các vật khác đặt trong nó.",
+                            formulas: [],
+                            details: "Để xác định chiều đường sức từ của dòng điện, ta dùng quy tắc nắm tay phải. Các đường sức từ là những đường cong khép kín, đi ra từ cực Bắc và đi vào cực Nam của nam châm.",
+                            sections: ["Từ trường", "Cảm ứng từ", "Đường sức từ"],
+                            sectionDetails: {
+                                "Từ trường": "Là môi trường vật chất đặc biệt tồn tại xung quanh nam châm hoặc dòng điện, biểu hiện qua lực từ.",
+                                "Cảm ứng từ": "Là đại lượng véc-tơ (kí hiệu $\\vec{B}$) đặc trưng cho từ trường về phương diện tác dụng lực. Đơn vị là Tesla (T).",
+                                "Đường sức từ": "Là những đường mô tả từ trường, sao cho tiếp tuyến tại mỗi điểm có phương, chiều trùng với véc-tơ cảm ứng từ. Quy tắc chung: ra Bắc vào Nam."
+                            }
+                        },
+                        "Bài 10: Lực từ. Cảm ứng từ": {
+                            summary: "Bài học nghiên cứu về lực từ do từ trường tác dụng lên một đoạn dây dẫn có dòng điện chạy qua.",
+                            formulas: [{ eq: "$F = BIL\\sin\\alpha$", desc: "<b>Lực từ (Lực Am-pe):</b><br><i> • F: độ lớn lực từ (N).<br> • B: độ lớn cảm ứng từ (T).<br> • I: cường độ dòng điện (A).<br> • L: chiều dài đoạn dây dẫn trong từ trường (m).<br> • α: góc hợp bởi chiều dòng điện và chiều của véc-tơ cảm ứng từ.</i>" }],
+                            details: "Chiều của lực từ được xác định bằng quy tắc bàn tay trái.",
+                            sections: ["Thí nghiệm khảo sát lực từ", "Độ lớn cảm ứng từ"],
+                            sectionDetails: {
+                                "Thí nghiệm khảo sát lực từ": "Lực từ có phương vuông góc với cả đoạn dây và đường sức từ. Chiều xác định bằng quy tắc bàn tay trái.",
+                                "Độ lớn cảm ứng từ": "Độ lớn cảm ứng từ B được định nghĩa thông qua biểu thức tính lực từ, đặc trưng cho độ mạnh yếu của từ trường."
+                            }
+                        },
+                        "Bài 11: Thực hành đo độ lớn cảm ứng từ": {
+                            summary: "Bài thực hành này hướng dẫn cách sử dụng cân dòng điện để đo độ lớn của cảm ứng từ B do một nam châm điện tạo ra.",
+                            formulas: [{ eq: "$B=\\frac{F}{NIL}$", desc: "<b>Công thức đo cảm ứng từ:</b><br><i>Dựa trên việc đo trực tiếp lực từ F tác dụng lên khung dây.</i>" }],
+                            details: "Phương pháp này dựa trên việc đo lực từ F tác dụng lên đoạn dây dẫn một cách trực tiếp bằng các dụng cụ thí nghiệm.",
+                            sections: ["Thí nghiệm đo cảm ứng từ"],
+                            sectionDetails: {
+                                "Thí nghiệm đo cảm ứng từ": "Nguyên tắc là đặt một khung dây có dòng điện I chạy qua vào trong từ trường cần đo. Lực từ F tác dụng lên khung dây sẽ được đo bằng lực kế. Từ các giá trị F, I, L và số vòng dây N, ta có thể tính được độ lớn của cảm ứng từ B."
+                            }
+                        },
+                        "Bài 12: Hiện tượng cảm ứng điện từ": {
+                            summary: "Đây là hiện tượng nền tảng của việc sản xuất điện. Khi từ thông qua một mạch kín biến thiên, trong mạch sẽ xuất hiện một suất điện động cảm ứng.",
+                            formulas: [
+                                { eq: "$\\Phi = NBScos\\alpha$", desc: "<b>Từ thông:</b><br><i> • Φ: từ thông (Wb - Ve-be).<br> • N: số vòng dây.<br> • B: cảm ứng từ (T).<br> • S: diện tích của một vòng dây (m²).<br> • α: góc hợp bởi véc-tơ pháp tuyến $\\vec{n}$ và véc-tơ cảm ứng từ $\\vec{B}$.</i>" }, 
+                                { eq: "$e_c = -\\frac{\\Delta\\Phi}{\\Delta t}$", desc: "<b>Định luật Faraday:</b><br><i> • eₑ: suất điện động cảm ứng (V).<br> • ΔΦ: độ biến thiên từ thông trong thời gian Δt (Wb).</i>" }
+                            ],
+                            details: "Dấu '-' trong công thức định luật Faraday thể hiện nội dung của định luật Lenz: Dòng điện cảm ứng sinh ra có chiều sao cho từ trường do nó sinh ra có tác dụng chống lại sự biến thiên từ thông đã sinh ra nó.",
+                            sections: ["Từ thông", "Hiện tượng cảm ứng điện từ", "Sóng điện từ"],
+                            sectionDetails: {
+                                "Từ thông": "Là đại lượng đặc trưng cho số đường sức từ xuyên qua một diện tích S.",
+                                "Hiện tượng cảm ứng điện từ": "Là hiện tượng xuất hiện dòng điện cảm ứng trong một mạch kín khi từ thông qua mạch đó biến thiên. Chiều dòng điện cảm ứng được xác định theo định luật Lenz.",
+                                "Sóng điện từ": "Là sự lan truyền trong không gian của điện từ trường biến thiên. Sóng điện từ là sóng ngang."
+                            }
+                        },
+                        "Bài 13: Đại cương về dòng điện xoay chiều": {
+                            summary: "Dòng điện xoay chiều là dòng điện có cường độ biến thiên điều hòa theo thời gian. Đây là loại dòng điện được sử dụng phổ biến trong sinh hoạt và sản xuất.",
+                            formulas: [
+                                { eq: "$i = I_0 \\cos(\\omega t + \\phi_i)$", desc: "<b>Biểu thức cường độ tức thời:</b><br><i> • i: giá trị cường độ tức thời (A).<br> • I₀: giá trị cường độ cực đại (biên độ) (A).<br> • ω: tần số góc (rad/s).</i>" }, 
+                                { eq: "$I = \\frac{I_0}{\\sqrt{2}}$ và $U = \\frac{U_0}{\\sqrt{2}}$", desc: "<b>Giá trị hiệu dụng:</b><br><i> • I, U: giá trị hiệu dụng của cường độ dòng điện và điện áp.</i>" }
+                            ],
+                            details: "Các giá trị điện áp (ví dụ 220V) và cường độ dòng điện ghi trên các thiết bị điện thường là các giá trị hiệu dụng.",
+                            sections: ["Dòng điện xoay chiều", "Các giá trị hiệu dụng", "Ứng dụng và an toàn điện"],
+                            sectionDetails: {
+                                "Dòng điện xoay chiều": "Được tạo ra bằng cách cho khung dây quay đều trong từ trường đều, làm từ thông biến thiên điều hòa.",
+                                "Các giá trị hiệu dụng": "Giá trị hiệu dụng (I, U) của dòng điện xoay chiều được định nghĩa dựa trên tác dụng nhiệt tương đương với một dòng điện không đổi.",
+                                "Ứng dụng và an toàn điện": "Dòng điện xoay chiều được dùng phổ biến do dễ dàng truyền tải đi xa. Cần tuân thủ nghiêm ngặt các quy tắc an toàn."
+                            }
+                        }
+                    },
+                    "Chương 4: VẬT LÍ HẠT NHÂN": {
+                         "Bài 14: Hạt nhân và mô hình nguyên tử": {
+                            summary: "Bài học giới thiệu cấu trúc cơ bản của nguyên tử, bao gồm hạt nhân ở trung tâm (chứa proton và neutron) và lớp vỏ electron chuyển động xung quanh.",
+                            formulas: [
+                                { eq: "$_Z^A X$", desc: "<b>Kí hiệu hạt nhân:</b><br><i> • X: kí hiệu hóa học của nguyên tố.<br> • A: số khối (tổng số proton và neutron).<br> • Z: số hiệu nguyên tử (số proton).</i>" }, 
+                                { eq: "$A = Z + N$", desc: "<b>Thành phần hạt nhân:</b><br><i> • A: số khối.<br> • Z: số proton.<br> • N: số neutron.</i>" }
+                            ],
+                            details: "Các nguyên tử có cùng số proton Z nhưng khác số neutron N được gọi là các đồng vị của cùng một nguyên tố hóa học.",
+                            sections: ["Thí nghiệm tán xạ hạt alpha", "Hạt nhân của nguyên tử"],
+                            sectionDetails: {
+                                "Thí nghiệm tán xạ hạt alpha": "Thí nghiệm của Rutherford đã chứng minh rằng nguyên tử có cấu trúc rỗng, với hạt nhân mang điện tích dương tập trung ở tâm.",
+                                "Hạt nhân của nguyên tử": "Hạt nhân được cấu tạo bởi các hạt nucleon (proton và neutron). Số proton Z quyết định tính chất hóa học của nguyên tố."
+                            }
+                        },
+                        "Bài 15: Năng lượng liên kết hạt nhân": {
+                            summary: "Bài học giải thích sự bền vững của hạt nhân thông qua khái niệm độ hụt khối và năng lượng liên kết, dựa trên hệ thức tương đương khối lượng - năng lượng của Einstein.",
+                            formulas: [
+                                { eq: "$E = mc^2$", desc: "<b>Hệ thức Einstein:</b><br><i> • E: năng lượng (J).<br> • m: khối lượng (kg).<br> • c: tốc độ ánh sáng trong chân không.</i>" },
+                                { eq: "$\\Delta m = [Z \\cdot m_p + (A-Z)m_n] - m_X$", desc: "<b>Độ hụt khối</b>" },
+                                { eq: "$W_{lk} = \\Delta m \\cdot c^2$", desc: "<b>Năng lượng liên kết</b>" },
+                                { eq: "$W_{lk \\text{ riêng}} = \\frac{W_{lk}}{A}$", desc: "<b>Năng lượng liên kết riêng</b>" }
+                            ],
+                            details: "Năng lượng liên kết riêng càng lớn thì hạt nhân càng bền vững. Các hạt nhân có số khối trung bình (A từ 50 đến 80) bền vững nhất.",
+                            sections: ["Hệ thức Einstein", "Khối lượng hạt nhân", "Năng lượng liên kết hạt nhân"],
+                            sectionDetails: {
+                                "Hệ thức Einstein": "Cho thấy sự tương đương giữa khối lượng và năng lượng. Trong vật lí hạt nhân, năng lượng thường được đo bằng MeV.",
+                                "Khối lượng hạt nhân": "Khối lượng của một hạt nhân luôn nhỏ hơn tổng khối lượng của các nucleon tạo thành nó. Độ chênh lệch này là độ hụt khối (Δm).",
+                                "Năng lượng liên kết hạt nhân": "Là năng lượng tối thiểu cần cung cấp để phá vỡ một hạt nhân thành các nucleon riêng biệt."
+                            }
+                        },
+                        "Bài 16: Phản ứng phân hạch, phản ứng nhiệt hạch và ứng dụng": {
+                            summary: "Bài học giới thiệu hai loại phản ứng hạt nhân tỏa năng lượng đặc biệt quan trọng: phản ứng phân hạch và phản ứng nhiệt hạch.",
+                            formulas: [],
+                            details: "Phản ứng phân hạch là cơ sở của các nhà máy điện hạt nhân. Phản ứng nhiệt hạch là nguồn năng lượng của Mặt Trời và các ngôi sao.",
+                            sections: ["Phản ứng hạt nhân", "Phản ứng phân hạch và phản ứng nhiệt hạch"],
+                            sectionDetails: {
+                                "Phản ứng hạt nhân": "Là quá trình các hạt nhân tương tác với nhau và biến đổi thành các hạt nhân khác.",
+                                "Phản ứng phân hạch và phản ứng nhiệt hạch": "Phân hạch là phản ứng một hạt nhân nặng vỡ thành các hạt nhân nhẹ hơn. Nhiệt hạch là phản ứng hai hay nhiều hạt nhân nhẹ hợp lại thành một hạt nhân nặng hơn."
+                            }
+                        },
+                        "Bài 17: Hiện tượng phóng xạ": {
+                            summary: "Phóng xạ là quá trình phân rã tự phát của một hạt nhân không bền vững, tuân theo quy luật mang tính thống kê.",
+                            formulas: [
+                                { eq: "$N(t) = N_0 \\cdot 2^{-t/T} = N_0 e^{-\\lambda t}$", desc: "<b>Định luật phóng xạ:</b><br><i> • N(t): số hạt nhân còn lại tại thời điểm t.<br> • N₀: số hạt nhân ban đầu.<br> • T: chu kì bán rã. <br> • λ: hằng số phóng xạ.</i>" }, 
+                                { eq: "$H(t) = H_0 \\cdot 2^{-t/T} = H_0 e^{-\\lambda t}$", desc: "<b>Độ phóng xạ:</b><br><i> • H(t): độ phóng xạ tại thời điểm t (Bq).</i>" }
+                            ],
+                            details: "Phóng xạ là một quá trình hoàn toàn tự phát, không phụ thuộc vào các yếu tố bên ngoài như nhiệt độ, áp suất.",
+                            sections: ["Hiện tượng phóng xạ", "Bản chất của các tia phóng xạ", "Định luật phóng xạ"],
+                            sectionDetails: {
+                                "Hiện tượng phóng xạ": "Là hiện tượng một hạt nhân không bền vững tự phát phân rã, biến đổi thành hạt nhân khác và phát ra các tia phóng xạ.",
+                                "Bản chất của các tia phóng xạ": "Gồm tia alpha (hạt nhân $_2^4He$), tia beta (electron hoặc positron), và tia gamma (sóng điện từ năng lượng cao).",
+                                "Định luật phóng xạ": "Mô tả quy luật phân rã của một tập hợp nhiều hạt nhân. Đặc trưng cho mỗi chất phóng xạ là chu kì bán rã T."
+                            }
+                        },
+                        "Bài 18: An toàn phóng xạ": {
+                            summary: "Bài học này cung cấp các kiến thức về tác hại sinh học của bức xạ ion hóa và các nguyên tắc, biện pháp để đảm bảo an toàn khi làm việc trong môi trường có phóng xạ.",
+                            formulas: [],
+                            details: "Việc tuân thủ các quy định an toàn phóng xạ là cực kỳ quan trọng để bảo vệ sức khỏe con người và môi trường.",
+                            sections: ["Tác hại của các tia phóng xạ", "Biển cảnh báo phóng xạ", "Quy tắc an toàn phóng xạ"],
+                            sectionDetails: {
+                                "Tác hại của các tia phóng xạ": "Tia phóng xạ có khả năng ion hóa vật chất, gây ra các tác hại sinh học đối với cơ thể sống tùy thuộc vào loại tia, liều lượng và thời gian chiếu xạ.",
+                                "Biển cảnh báo phóng xạ": "Sử dụng các biểu tượng tiêu chuẩn quốc tế để cảnh báo về sự nguy hiểm của phóng xạ.",
+                                "Quy tắc an toàn phóng xạ": "Để đảm bảo an toàn, cần tuân thủ 3 nguyên tắc: giảm thời gian tiếp xúc, tăng khoảng cách đến nguồn, và sử dụng các vật che chắn thích hợp."
+                            }
+                        }
+                    }
+                };
+                
+                // --- CHAT FUNCTIONS ---
+
+                const addMessage = (sender, message, imageUrl = null) => {
+                    const isBot = sender === 'bot';
+                    const messageWrapper = document.createElement('div');
+                    
+                    let contentHTML = `<div class="text-sm leading-relaxed">${message}</div>`;
+                    if (imageUrl) {
+                        contentHTML = `<img src="${imageUrl}" alt="Uploaded Image" class="rounded-lg max-w-xs max-h-64 object-contain bg-slate-200 p-1">`;
+                    }
+
+                    const messageHTML = `
+                        <div class="flex items-start ${isBot ? 'justify-start' : 'justify-end'} mb-4 animate-fade-in">
+                            ${isBot ? `
+                                <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0 text-white font-bold text-lg shadow-md">
+                                    Th
+                                </div>` : ''}
+                            <div class="max-w-lg lg:max-w-xl p-3 px-4 rounded-2xl shadow-sm ${isBot ? 'bg-slate-100 text-slate-800' : 'bg-cyan-500 text-white'}">
+                                ${contentHTML}
+                            </div>
+                        </div>
+                    `;
+                    
+                    messageWrapper.innerHTML = messageHTML;
+                    DOM.chatContainer.appendChild(messageWrapper);
+                    
+                    if (window.renderMathInElement) {
+                         setTimeout(() => {
+                            renderMathInElement(document.body, {
+                                delimiters: [
+                                    {left: '$$', right: '$$', display: true},
+                                    {left: '$', right: '$', display: false},
+                                ]
+                            });
+                        }, 0);
+                    }
+                    DOM.chatContainer.scrollTop = DOM.chatContainer.scrollHeight;
+                };
+
+                const showIndicator = (text = '...') => {
+                    const indicatorId = 'typing-indicator';
+                    const existingIndicator = document.getElementById(indicatorId);
+                    if (existingIndicator) existingIndicator.remove();
+
+                    const indicator = document.createElement('div');
+                    indicator.id = indicatorId;
+                    indicator.className = 'flex items-start justify-start mb-4';
+                    let indicatorContent = `<div class="flex items-center space-x-1"><span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0s;"></span><span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></span><span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style="animation-delay: 0.4s;"></span></div>`;
+                    if(text !== '...'){
+                         indicatorContent = `<p class="text-sm italic">${text}</p>`;
+                    }
+
+                    indicator.innerHTML = `
+                        <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0 text-white font-bold text-lg shadow-md">Th</div>
+                        <div class="max-w-lg lg:max-w-xl p-3 px-4 rounded-2xl shadow-sm bg-slate-100 text-slate-800">${indicatorContent}</div>`;
+                    DOM.chatContainer.appendChild(indicator);
+                    DOM.chatContainer.scrollTop = DOM.chatContainer.scrollHeight;
+                };
+
+                const hideIndicator = () => {
+                    const indicator = document.getElementById('typing-indicator');
+                    if (indicator) indicator.remove();
+                };
+
+                const solvePhysicsProblemFromImage = async (base64ImageData) => {
+                    showIndicator('Thầy đang phân tích và giải bài tập...');
+                    
+                    const prompt = "Phân tích và giải bài tập vật lý trong hình ảnh này. Trình bày lời giải một cách chi tiết, khoa học, dễ hiểu. Sử dụng thẻ <br> để xuống dòng và <b></b> để in đậm các đề mục và từ khóa quan trọng. Cấu trúc lời giải phải tuân thủ nghiêm ngặt như sau: <b>1. Tóm tắt đề bài:</b><br> - Liệt kê các dữ kiện và yêu cầu.<br><b>2. Phân tích và hướng giải:</b><br> - Nêu các định luật, công thức vật lý cần áp dụng.<br><b>3. Lời giải chi tiết:</b><br> - Trình bày các bước tính toán, chú ý đổi đơn vị nếu cần. Nếu có nhiều câu hỏi (a, b, c), hãy đề mục là <b>Câu a)</b>, <b>Câu b)</b>...<br> - Trong các phép tính, hãy sử dụng dấu chấm '.' thay cho dấu sao '*' để biểu thị phép nhân.<br><b>4. Kết quả:</b><br> - Ghi rõ đáp án cuối cùng cho từng câu hỏi.";
+                    const imageMimeType = base64ImageData.substring(5, base64ImageData.indexOf(';'));
+                    const imageData = base64ImageData.split(',')[1];
+
+                    const payload = {
+                        contents: [{
+                            role: "user",
+                            parts: [
+                                { text: prompt },
+                                { inlineData: { mimeType: imageMimeType, data: imageData } }
+                            ]
+                        }]
+                    };
+                    
+                    const apiKey = ""; // Canvas will provide the key
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`API error: ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+                        hideIndicator();
+                        
+                        if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const solutionText = result.candidates[0].content.parts[0].text;
+                            addMessage('bot', `Đây là lời giải của thầy cho bài tập:<br><br>${solutionText}`);
+                        } else {
+                            addMessage('bot', 'Xin lỗi em, thầy không thể giải bài tập này. Em có thể thử lại với hình ảnh rõ nét hơn.');
+                        }
+                    } catch (error) {
+                        hideIndicator();
+                        console.error("Error solving problem from image:", error);
+                        addMessage('bot', 'Đã có lỗi xảy ra khi giải bài tập. Em vui lòng thử lại sau.');
+                    }
+                };
+                
+                const getAIResponse = async (query) => {
+                    showIndicator('Thầy đang suy nghĩ...');
+
+                    const prompt = `Bạn là "Thầy Physics", một chatbot trợ giảng Vật lí 12. Nhiệm vụ của bạn là trả lời câu hỏi của học sinh một cách thân thiện, dễ hiểu, và chính xác. YÊU CẦU ĐỊNH DẠNG NGHIÊM NGẶT: 1. Luôn sử dụng thẻ <br> để bắt đầu một dòng mới cho mỗi ý trong danh sách (ví dụ: các mục a), b), c) phải nằm trên các dòng riêng biệt). 2. Chỉ sử dụng thẻ <b></b> để in đậm các từ khóa hoặc nội dung quan trọng. Tuyệt đối không dùng các ký tự markdown như **. Câu hỏi của học sinh là: "${query}". Hãy trả lời câu hỏi này theo đúng định dạng yêu cầu.`;
+
+                    const payload = {
+                        contents: [{ role: "user", parts: [{ text: prompt }] }]
+                    };
+                    
+                    const apiKey = ""; // Canvas will provide the key
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`API error: ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+                        hideIndicator();
+                        
+                        if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const aiResponse = result.candidates[0].content.parts[0].text;
+                            addMessage('bot', aiResponse);
+                        } else {
+                             addMessage('bot', 'Xin lỗi em, thầy chưa nghĩ ra câu trả lời cho câu hỏi này.');
+                        }
+                    } catch (error) {
+                        hideIndicator();
+                        console.error("Error getting AI response:", error);
+                        addMessage('bot', 'Đã có lỗi xảy ra khi kết nối với trí tuệ nhân tạo. Em vui lòng thử lại sau.');
+                    }
+                };
+
+
+                const handleFileUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const imageUrl = e.target.result;
+                            addMessage('user', '', imageUrl);
+                            solvePhysicsProblemFromImage(imageUrl);
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        addMessage('user', `Đã tải lên tệp: ${file.name}`);
+                        addMessage('bot', 'Cảm ơn em. Hiện tại, thầy mới chỉ có thể phân tích hình ảnh. Em có câu hỏi nào về các bài học không?');
+                    }
+                    event.target.value = '';
+                };
+
+                const handlePaste = (event) => {
+                    const items = (event.clipboardData || window.clipboardData).items;
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf('image') !== -1) {
+                            const blob = items[i].getAsFile();
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                const imageUrl = e.target.result;
+                                addMessage('user', '', imageUrl);
+                                solvePhysicsProblemFromImage(imageUrl);
+                            };
+                            reader.readAsDataURL(blob);
+                            event.preventDefault();
+                            return;
+                        }
+                    }
+                };
+                
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                let recognition;
+                let isListening = false;
+
+                if (SpeechRecognition) {
+                    recognition = new SpeechRecognition();
+                    recognition.lang = 'vi-VN';
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+
+                    recognition.onstart = () => {
+                        isListening = true;
+                        DOM.micIcon.classList.add('text-red-500');
+                        DOM.userInput.placeholder = "Thầy đang nghe...";
+                    };
+
+                    recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        DOM.userInput.value = transcript;
+                        setTimeout(() => handleUserSubmit(), 500);
+                    };
+
+                    recognition.onerror = (event) => {
+                        console.error("Speech recognition error:", event.error);
+                        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                            addMessage('bot', 'Thầy không thể nghe được. Em vui lòng cấp quyền truy cập micro cho trình duyệt nhé.');
+                        }
+                    };
+
+                    recognition.onend = () => {
+                        isListening = false;
+                        DOM.micIcon.classList.remove('text-red-500');
+                        DOM.userInput.placeholder = "Hỏi thầy, tải lên hoặc dán ảnh bài tập...";
+                    };
+
+                    DOM.micBtn.addEventListener('click', () => {
+                        if (!isListening) {
+                            recognition.start();
+                        } else {
+                            recognition.stop();
+                        }
+                    });
+
+                } else {
+                    DOM.micBtn.style.display = 'none';
+                    addMessage('bot', 'Rất tiếc, trình duyệt của em không hỗ trợ tính năng nhận dạng giọng nói.');
+                }
+
+                // --- TOC and Lesson Functions ---
+                const showLessonDetails = (chapter, lesson) => {
+                    const data = physicsData[chapter][lesson];
+                    let response = `Tuyệt vời! Chúng ta cùng xem lại kiến thức trọng tâm của <b>${lesson}</b> nhé.<br><br>`;
+                    response += `<b>Tóm tắt:</b><br>${data.summary}<br><br>`;
+                    if (data.formulas.length > 0) {
+                        response += `<b>Các công thức cần nhớ:</b><br>`;
+                        data.formulas.forEach(item => {
+                            response += `<div class="my-2 p-2 bg-slate-200/50 rounded-lg"><div class="font-semibold">${item.eq}</div><div class="text-xs text-slate-600 ml-1 mt-1">${item.desc}</div></div>`;
+                        });
+                        response += `<br>`;
+                    }
+                    if (data.details) response += `<b>Thầy lưu ý:</b><br>${data.details}`;
+                    
+                    const buttonId = `quiz-btn-${Date.now()}`;
+                    response += `<br><button id="${buttonId}" class="p-2 text-sm bg-emerald-100 text-emerald-800 rounded-lg hover:bg-emerald-200 transition-colors focus:outline-none">✨ Thử sức với câu hỏi trắc nghiệm</button>`;
+                    
+                    addMessage('bot', response);
+
+                    setTimeout(() => {
+                        const quizBtn = document.getElementById(buttonId);
+                        if (quizBtn) {
+                            quizBtn.onclick = () => {
+                                quizBtn.disabled = true;
+                                quizBtn.innerHTML = '✨ Đang tạo câu hỏi...';
+                                generateQuiz(chapter, lesson);
+                            };
+                        }
+                    }, 0);
+                };
+                
+                // --- NEW: Generate Quiz Function ---
+                const generateQuiz = async (chapter, lesson) => {
+                    const lessonSummary = physicsData[chapter][lesson].summary;
+                    const prompt = `Bạn là "Thầy Physics", một chatbot trợ giảng Vật lí 12. Dựa vào nội dung chính của bài học "${lesson}" là: "${lessonSummary}", hãy tạo 2 câu hỏi trắc nghiệm Vật lí 12 (kèm theo 4 đáp án A, B, C, D và đáp án đúng) để kiểm tra kiến thức. YÊU CẦU ĐỊNH DẠNG NGHIÊM NGẶT: 1. Bắt đầu mỗi câu hỏi bằng "<b>Câu hỏi 1:</b>", "<b>Câu hỏi 2:</b>",... trên một dòng riêng. 2. Các đáp án A, B, C, D và dòng "Đáp án đúng" cũng phải nằm trên các dòng riêng biệt. 3. Luôn sử dụng thẻ <br> để xuống dòng. 4. Chỉ sử dụng thẻ <b></b> để in đậm các từ khóa hoặc nội dung quan trọng. TUYỆT ĐỐI KHÔNG DÙNG các ký tự markdown như **.`;
+
+                    showIndicator('Thầy đang soạn câu hỏi...');
+
+                    const payload = {
+                        contents: [{ role: "user", parts: [{ text: prompt }] }]
+                    };
+                    
+                    const apiKey = ""; // Canvas will provide the key
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`API error: ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+                        hideIndicator();
+                        
+                        if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const quizText = result.candidates[0].content.parts[0].text;
+                            addMessage('bot', `Tất nhiên rồi! Dưới đây là một vài câu hỏi để em thử sức:<br><br>${quizText}`);
+                        } else {
+                             addMessage('bot', 'Xin lỗi em, thầy chưa nghĩ ra câu hỏi nào lúc này.');
+                        }
+                    } catch (error) {
+                        hideIndicator();
+                        console.error("Error generating quiz:", error);
+                        addMessage('bot', 'Đã có lỗi xảy ra khi tạo câu hỏi. Em vui lòng thử lại sau.');
+                    }
+                };
+
+
+                const handleLessonClick = (chapter, lesson) => {
+                    addMessage('user', `Thầy giảng cho em về ${lesson} ạ.`);
+                    showIndicator();
+                    setTimeout(() => {
+                        hideIndicator();
+                        showLessonDetails(chapter, lesson);
+                    }, 800);
+                };
+
+                const handleSectionClick = (chapter, lesson, section) => {
+                    addMessage('user', `Thầy nói rõ hơn về mục "${section}" được không ạ?`);
+                    const sectionSummary = physicsData[chapter][lesson].sectionDetails[section];
+                    showIndicator();
+                    setTimeout(() => {
+                        hideIndicator();
+                        if (sectionSummary) {
+                            addMessage('bot', `Tất nhiên rồi! Đây là nội dung chính của mục <b>${section}</b>:<br><br>${sectionSummary}`);
+                        } else {
+                            addMessage('bot', `Xin lỗi em, thầy chưa có thông tin chi tiết về mục này.`);
+                        }
+                    }, 800);
+                };
+
+                const populateTableOfContents = () => {
+                    DOM.tocContainer.innerHTML = '';
+                    for (const chapter in physicsData) {
+                        const details = document.createElement('details');
+                        details.className = 'mb-2 group';
+                        details.open = true;
+
+                        const summary = document.createElement('summary');
+                        summary.className = 'font-semibold text-slate-700 cursor-pointer p-2 rounded-md hover:bg-slate-200 transition-colors flex items-center justify-between';
+                        summary.innerHTML = `<span>${chapter}</span><span class="arrow w-4 h-4 text-slate-500 transform transition-transform"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></span>`;
+                        
+                        const ul = document.createElement('ul');
+                        ul.className = 'ml-2 mt-2 pl-4 border-l-2 border-slate-200';
+
+                        for (const lesson in physicsData[chapter]) {
+                            const li = document.createElement('li');
+                            li.className = 'my-1';
+                            
+                            const a = document.createElement('a');
+                            a.href = '#';
+                            a.textContent = lesson;
+                            a.className = 'block p-2 text-sm font-medium text-slate-600 rounded-md transition-all duration-200 ease-in-out hover:bg-cyan-100 hover:text-cyan-800 hover:translate-x-1';
+                            a.onclick = (e) => { e.preventDefault(); handleLessonClick(chapter, lesson); };
+                            li.appendChild(a);
+
+                            const lessonData = physicsData[chapter][lesson];
+                            if (lessonData.sections && lessonData.sections.length > 0) {
+                                const subUl = document.createElement('ul');
+                                subUl.className = 'ml-4 mt-1 space-y-1';
+                                lessonData.sections.forEach(section => {
+                                    const subLi = document.createElement('li');
+                                    const subA = document.createElement('a');
+                                    subA.href = '#';
+                                    subA.innerHTML = `<span class="text-xs text-slate-500 hover:text-cyan-700 transition-colors">${section}</span>`;
+                                    subA.className = 'block py-1 pl-2 border-l-2 border-slate-200 hover:border-cyan-500';
+                                    subA.onclick = (e) => { e.preventDefault(); e.stopPropagation(); handleSectionClick(chapter, lesson, section); };
+                                    subLi.appendChild(subA);
+                                    subUl.appendChild(subLi);
+                                });
+                                li.appendChild(subUl);
+                            }
+                            ul.appendChild(li);
+                        }
+                        
+                        details.appendChild(summary);
+                        details.appendChild(ul);
+                        DOM.tocContainer.appendChild(details);
+                    }
+                };
+                
+                const handleUserSubmit = () => {
+                    const query = DOM.userInput.value.trim();
+                    if (query === '') return;
+
+                    addMessage('user', query);
+                    DOM.userInput.value = '';
+                    
+                    getAIResponse(query);
+                };
+
+                /**
+                 * Initializes the application.
+                 */
+                const initializeApp = () => {
+                    DOM.sendBtn.addEventListener('click', handleUserSubmit);
+                    DOM.userInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') handleUserSubmit();
+                    });
+                    DOM.fileInput.addEventListener('change', handleFileUpload);
+                    document.addEventListener('paste', handlePaste);
+
+                    // Sidebar toggle logic
+                    DOM.menuBtn.addEventListener('click', () => {
+                        DOM.sidebar.classList.remove('-translate-x-full');
+                        DOM.sidebarOverlay.classList.remove('hidden');
+                    });
+                    DOM.closeSidebarBtn.addEventListener('click', () => {
+                        DOM.sidebar.classList.add('-translate-x-full');
+                        DOM.sidebarOverlay.classList.add('hidden');
+                    });
+                    DOM.sidebarOverlay.addEventListener('click', () => {
+                        DOM.sidebar.classList.add('-translate-x-full');
+                        DOM.sidebarOverlay.classList.add('hidden');
+                    });
+
+
+                    populateTableOfContents();
+                    
+                    showIndicator();
+                    setTimeout(() => {
+                        hideIndicator();
+                        addMessage('bot', 'Chào em, thầy là Physics. Em có thể chọn bài học, đặt câu hỏi bằng giọng nói, tải lên hoặc dán một hình ảnh bài tập để thầy giải giúp nhé!');
+                    }, 1200);
+                };
+
+                // --- START APP ---
+                initializeApp();
+            });
+        })();
+    </script>
+</body>
+</html>
